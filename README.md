@@ -1,4 +1,7 @@
-# 라이브러리 설정
+
+# Android SDK 사용 가이드
+
+## 라이브러리 설정
 
 ---
 
@@ -49,7 +52,7 @@
     * 자세한 사항은 https://firebase.google.com/docs/cloud-messaging/android/client?hl=ko 참고!
 
 4. aar 파일을 다운로드 한다.
-    * (링크)
+    * https://github.com/iotreemaster/iotreemaster.github.io/raw/main/iotreePush.aar
 5. app/libs에 다운로드한 aar 파일을 저장하고 build.gradle(app)에 라이브러리를 추가해준다.
 
     ```
@@ -66,7 +69,7 @@
     ```
 
 
-# API 사용 방법
+## API 사용 방법
 
 ---
 
@@ -147,14 +150,19 @@
 ### 토픽 구독 해제
    * 지정된 토픽 구독을 해제한다. 토픽 구독을 해제하면 토픽으로 메세지를 발송해도 수신이 되지 않는다.
      * topic: 토픽
-     * callback:
+     * callback:완료 시 호출되는 callback 객체.
 
      ```
-     interface
+     interface UnsubscribeTopicCallback {
+         void onUnsubscribe(IoTreePushResult result);
+     }
 
-     IoTreePush.unsubscribeTopic(topic, result -> {
-         if (!result.isSuccess()) {
-             int code = result.getCode(); // 요청 실패한 경우, 에러 코드 확인 가능
+     IoTreePush.unsubscribeTopic(topic, new UnsubscribeTopicCallback() {
+         @Override
+         public void onUnsubscribe(IoTreePushResult result) {
+             if (!result.isSuccess()) {
+                 int code = result.getCode();
+             }
          }
      });
      ```
