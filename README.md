@@ -36,6 +36,7 @@
 
     * build.gradle(app)에 google service gradle plugin을 추가한다.
     * dependencies에는 firebase SDK를 추가한다.(버전은 최신 버전으로 적용)
+
     ```
     plugins {
         id 'com.android.application'
