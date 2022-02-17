@@ -208,7 +208,7 @@ SDK 사용을 위해서 다음 순서대로 구현을 진행한다.
 - 기본적으로 앱이 포그라운드 상태이면 Notification을 띄우지 않지만 SDK로 하여금 Notification을 띄우도록 설정하려면 enableForeground(true)로 설정한다. (default: false)
   - enable_foreground가 false인 경우 custom receiver를 구현하지 않았다면 앱에서는 메시지가 수신된 걸 알 수 없으므로 enable_foreground를 false로 설정한다면 custom receiver 구현을 권장한다.
 - Androidmanifest.xml 파일에서 설정한다. (Runtime에 설정할 수 없다.)
-- ~Runtime에 코드로 설정하거나 AndroidManifest.xml 파일에 메타 데이터로 정의할 수 있다. 만약 둘 다 설정된 경우 코드로 설정된 값이 우선 적용된다.~
+- ~~Runtime에 코드로 설정하거나 AndroidManifest.xml 파일에 메타 데이터로 정의할 수 있다. 만약 둘 다 설정된 경우 코드로 설정된 값이 우선 적용된다.~~
 
   ```xml
   <meta-data android:name="kr.co.iotree.push.notification.default_notification_icon"
@@ -222,7 +222,7 @@ SDK 사용을 위해서 다음 순서대로 구현을 진행한다.
               android:value="false" />
   ```
 
-  ~또는~
+  ~~또는~~
 
   ```
   IoTreeNotificationOptions options =
