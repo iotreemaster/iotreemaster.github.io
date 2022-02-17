@@ -16,7 +16,7 @@ SDK 사용을 위해서 다음 순서대로 구현을 진행한다.
    - 기본 알림(Notification)을 사용하지 않고 기본 동작의 수정을 원하는 경우 Custom Receiver를 구현한다.
 8. 기타 API의 경우 설명을 참조하여 필요 시 사용하면 된다.
 
-각 항목의 자세한 사항은 아래 **API 사용 방법** 참조.
+각 항목의 자세한 사항은 아래 내용 참조.
 
 ## 라이브러리 설정
 
@@ -206,9 +206,25 @@ SDK 사용을 위해서 다음 순서대로 구현을 진행한다.
 - Notification의 아이콘, 색상, 알림음을 설정한다.
 - 알림음의 경우, res/raw에 저장된 로컬 리소스만 사용가능 하다.
 - 기본적으로 앱이 포그라운드 상태이면 Notification을 띄우지 않지만 SDK로 하여금 Notification을 띄우도록 설정하려면 enableForeground(true)로 설정한다. (default: false)
-- Runtime에 코드로 설정하거나 AndroidManifest.xml 파일에 메타 데이터로 정의할 수 있다. 만약 둘 다 설정된 경우 코드로 설정된 값이 우선 적용된다.
+  - enable_foreground가 false인 경우 custom receiver를 구현하지 않았다면 앱에서는 메시지가 수신된 걸 알 수 없으므로 enable_foreground를 false로 설정한다면 custom receiver 구현을 권장한다.
+- Androidmanifest.xml 파일에서 설정한다. (Runtime에 설정할 수 없다.)
+- ~Runtime에 코드로 설정하거나 AndroidManifest.xml 파일에 메타 데이터로 정의할 수 있다. 만약 둘 다 설정된 경우 코드로 설정된 값이 우선 적용된다.~
 
-  ```java
+  ```xml
+  <meta-data android:name="kr.co.iotree.push.notification.default_notification_icon"
+              android:resource="@drawable/default_notification_icon" />
+  <meta-data android:name="kr.co.iotree.push.notification.default_notification_color"
+              android:resource="@color/default_notification_color" />
+  <meta-data android:name="kr.co.iotree.push.notification.default_notification_sound"
+              android:value="noti" />
+  <meta-data
+  android:name="kr.co.iotree.push.notification.foreground_enabled"
+              android:value="false" />
+  ```
+
+  ~또는~
+
+  ```
   IoTreeNotificationOptions options =
       new IoTreeNotificationOptions.Builder(context)
           .setChannelName(channelName) // 기본 채널 아이디
@@ -220,20 +236,6 @@ SDK 사용을 위해서 다음 순서대로 구현을 진행한다.
           .build();
 
   IoTreePush.setDefaultOptions(context, options);
-  ```
-
-  또는
-
-  ```xml
-  <meta-data android:name="kr.co.iotree.push.notification.default_notification_icon"
-              android:resource="@drawable/default_notification_icon" />
-  <meta-data android:name="kr.co.iotree.push.notification.default_notification_color"
-              android:resource="@color/default_notification_color" />
-  <meta-data android:name="kr.co.iotree.push.notification.default_notification_sound"
-              android:value="noti" />
-  <meta-data
-  android:name="kr.co.iotree.push.notification.foreground_Enabled"
-              android:value="false" />
   ```
 
 ### Custom Receiver 구현
