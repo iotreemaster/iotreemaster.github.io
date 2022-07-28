@@ -6,7 +6,7 @@
 
 ## 라이브러리 설정 및 구현 가이드
 
-### 1. ioTreePush를 이용하기 위한 기본 설정 작업이 선행 되어야 한다.
+### 1. ioTreePush를 이용하기 위한 기본 설정 작업이 선행 되어야 한다
 
 - Firebase 프로젝트 생성 및 앱 번들 ID 등록.
 - ioTreePush 서버 설정.
@@ -32,64 +32,124 @@
 
 - `application:didRegisterForRemoteNotificationsWithDeviceToken:` 메소드는 아래 예시와 같이 IoTreePush.mapToken() 메소드만 호출해주면 된다.
 
-```swift
-import IoTreePushIos
+  - Swift
 
-...
+  ```swift
+  import IoTreePushIos
 
-class AppDelegate: NSObject, UIApplicationDelegate, IoTreePushDelegate {
+  ...
 
-    // ioTreePush 초기화 코드 구현 샘플.
-    func application(_ application: UIApplication,
-                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+  class AppDelegate: NSObject, UIApplicationDelegate, IoTreePushDelegate {
 
-        // SDK 초기화
-        IoTreePush.initialize(
-            application: application,
-            appKey: "eb4ba05f2ba256b2a42a6dc026a25ca3d321c53020007bc51067220ee9503ded", // 관리자 문의
-            delegate: self, // Optional
-            feedbackBaseUrl: "https://nas.iotree.co.kr:8092" // 관리자 문의, Optional
-        )
+      // ioTreePush 초기화 코드 구현 샘플.
+      func application(_ application: UIApplication,
+                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
 
-        // 토픽 수신
-        IoTreePush.subscribeTopic("__everyone__") { error in
-            if let error = error as NSError? {
-                print("Topic subscription failed. \(error.localizedDescription)")
-            } else {
-                print("Topic subscribed.")
-            }
-        }
+          // SDK 초기화
+          IoTreePush.initialize(
+              application: application,
+              appKey: "eb4ba05f2ba256b2a42a6dc026a25ca3d321c53020007bc51067220ee9503ded", // 관리자 문의
+              delegate: self, // Optional
+              feedbackBaseUrl: "https://nas.iotree.co.kr:8092" // 관리자 문의, Optional
+          )
 
-        // 여기서 "sampleid"는 하드코딩되어있지만 실제로는 비즈니스 로직에 따라 로그인과 같은 절차를
-        // 밟은 후에 얻어지는 사용자 식별자를 사용해야 한다.
-        IoTreePush.registerToken(withUserId: "sampleid") { (token, error) in
-            if let error = error as NSError? {
-                print("registerToken() failed. \(error.localizedDescription)")
-            } else {
-                print("FCM Token: \(token!)")
-            }
-        }
+          // 토픽 수신
+          IoTreePush.subscribeTopic("__everyone__") { error in
+              if let error = error as NSError? {
+                  print("Topic subscription failed. \(error.localizedDescription)")
+              } else {
+                  print("Topic subscribed.")
+              }
+          }
 
-        return true
-    }
+          // 여기서 "sampleid"는 하드코딩되어있지만 실제로는 비즈니스 로직에 따라 로그인과 같은 절차를
+          // 밟은 후에 얻어지는 사용자 식별자를 사용해야 한다.
+          IoTreePush.registerToken(withUserId: "sampleid") { (token, error) in
+              if let error = error as NSError? {
+                  print("registerToken() failed. \(error.localizedDescription)")
+              } else {
+                  print("FCM Token: \(token!)")
+              }
+          }
 
-    // 토큰 맵핑을 위한 메소드 구현.
-    func application(_ application: UIApplication,
-                     didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        IoTreePush.mapToken(deviceToken);
-    }
+          return true
+      }
 
-    // IoTreePushDelegate 구현.
-    func onMessage(willPresent data: [AnyHashable : Any], withId: String) {
-        print("onMessage:willPresent: \(data)")
-    }
+      // 토큰 맵핑을 위한 메소드 구현.
+      func application(_ application: UIApplication,
+                      didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+          IoTreePush.mapToken(deviceToken);
+      }
 
-    // IoTreePushDelegate 구현.
-    func onMessage(didReceive data: [AnyHashable : Any], withId: String) {
-        print("onMessage:didReceive: \(data)")
-    }
-}
-```
+      // IoTreePushDelegate 구현.
+      func onMessage(willPresent data: [AnyHashable : Any], withId: String) {
+          print("onMessage:willPresent: \(data)")
+      }
+
+      // IoTreePushDelegate 구현.
+      func onMessage(didReceive data: [AnyHashable : Any], withId: String) {
+          print("onMessage:didReceive: \(data)")
+      }
+  }
+  ```
+
+  - Objective-C
+
+  ```objectivec
+  #import "IoTreePush.h" // 라이브러리 경로에 맞게 import
+
+  ...
+
+  @implementation AppDelegate
+
+  - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+
+      // SDK 초기화
+      [IoTreePush initializeWithApplication:application
+                                    appKey:@"eb4ba05f2ba256b2a42a6dc026a25ca3d321c53020007bc51067220ee9503ded"
+                                  delegate:self
+                            feedbackBaseUrl:@"https://nas.iotree.co.kr:8092"];
+
+      // 여기서 "sampleid"는 하드코딩되어있지만 실제로는 비즈니스 로직에 따라 로그인과 같은 절차를
+      // 거친 후에 얻어지는 사용자 식별자를 사용해야 한다.
+      [IoTreePush registerTokenWithUserId:@"sampleid"
+                                  groups:[NSSet setWithArray: @[@"iOSGroup"]]
+                                callback:^(NSString * _Nullable token, NSError * _Nullable error) {
+          if (error) {
+              NSLog(@"registerTokenWithUserId failed. [%@]", error);
+          } else {
+              g_token = token;
+              NSLog(@"IoTreePush Token: %@", token);
+          }
+      }];
+
+      // 토픽 수신
+      [IoTreePush subscribeTopic:@"__everyone__" withCallback:^(NSError * _Nullable error) {
+          if (error) {
+              NSLog(@"Topic subscription failed. [%@]", error);
+          } else {
+              NSLog(@"Topic subscribed.");
+          }
+      }];
+
+      return YES;
+  }
+
+  /// 토큰 맵핑을 위한 메소드 구현.
+  - (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
+      [IoTreePush mapToken:deviceToken];
+  }
+
+  // Foreground 상태에서 메시지를 받으면 호출된다.
+  - (void)onMessageWillPresent:(NSDictionary *_Nonnull)data withId:(NSString *_Nonnull)pushId {
+      NSLog(@"onMessageWillPresent:withId: - %@", data);
+  }
+
+  // Background 상태에서 메시지를 받으면 호출된다.
+  - (void)onMessageDidReceive:(NSDictionary *_Nonnull)data withId:(NSString *_Nonnull)pushId {
+      NSLog(@"onMessageDidReceive:withId: - %@", data);
+  }
+  ```
 
 ### 4. 수신된 메시지를 전달받기 위한 IoTreePushDelegate 구현 (**Optional**)
 
@@ -125,22 +185,40 @@ iOS의 APN은 기본적으로 지원하지 않는다. 이미지를 지원하기 
 - 여기서 새로 등록한 Target의 Deployment Info 설정도 App의 설정과 같은 설정(iOS 버전 등)으로 맞춰주어야 한다.
 - 이제 소스를 열어서 IoTreePushIos 모듈을 임포트해주고 첫 번째 메소드의 코드를 아래와 같이 바꿔준다. if문만 아래 코드의 if문으로 교체하면 된다. (생성된 소스 코드는 NotificationService.swift 하나 뿐이다.)
 
-```swift
-import IoTreePushIos
+  - Swift
 
-...
+  ```swift
+  import IoTreePushIos
 
-override func didReceive(_ request: UNNotificationRequest,
-                         withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
-    self.contentHandler = contentHandler
-    bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
+  ...
 
-    // 이 if문으로 교체.
-    if let bestAttemptContent = bestAttemptContent {
-        IoTreePush.populateNotificationContent(bestAttemptContent, withContentHandler:contentHandler)
-    }
-}
-```
+  override func didReceive(_ request: UNNotificationRequest,
+                          withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
+      self.contentHandler = contentHandler
+      bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
+
+      // 이 if문으로 교체.
+      if let bestAttemptContent = bestAttemptContent {
+          IoTreePush.populateNotificationContent(bestAttemptContent, withContentHandler:contentHandler)
+      }
+  }
+  ```
+
+  - Objective-C
+
+  ```objectivec
+  #import "IoTreePush.h" // 라이브러리 설정 경로에 맞게 import.
+
+  ...
+
+  - (void)didReceiveNotificationRequest:(UNNotificationRequest *)request withContentHandler:(void (^)(UNNotificationContent * _Nonnull))contentHandler {
+      self.contentHandler = contentHandler;
+      self.bestAttemptContent = [request.content mutableCopy];
+
+      // 아래 코드로 교체.
+      [IoTreePush populateNotificationContent:_bestAttemptContent withContentHandler:contentHandler];
+  }
+  ```
 
 ### 6. 토큰 등록을 위한 Push 서버 접속 설정 (**Optional**)
 
