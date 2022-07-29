@@ -372,6 +372,15 @@ public static func mapToken(
 - APNS 토큰을 ioTreePush 토큰에 매핑한다. AppDelegate에서 `application(:didRegisterForRemoteNotificationsWithDeviceToken:)` 메소드를 구현하고 호출해주도록 한다. (**필수**)
   - deviceToken: `application(:didRegisterForRemoteNotificationsWithDeviceToken:)` 전달된 Token data.
 
+### 단말 수신 알림 처리
+
+```swift
+public static func handleDeliveredNotifications()
+```
+
+- 앱이 백그라운드 상태에서 수신된 푸시 메시지는 사용자가 메시지 Notification을 클릭할 때 까지는 서버로 수신 알림이 가지 않기 때문에 앱이 Active 상태가 될 때 이 메소드를 호출해주도록 한다.
+- 앱의 수신 알림 기능이 필요하지 않은 경우에는 호출하지 않아도 상관없다. 이 경우 서버에는 전송 상태로만 기록이 남게된다.
+
 ### Notification Service Extension 구현
 
 ```swift
