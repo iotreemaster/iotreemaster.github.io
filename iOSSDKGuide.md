@@ -1,8 +1,10 @@
 # iOS SDK 사용 가이드
 
 - iOS용 SDK는 현재 Firebase 8.7.0 버전 Dependency를 갖지만 추후에 상황에 따라 버전을 맞춰야 할 필요가 있다면 감안하여 버전을 맞춰서 배포하도록 한다.
-- Swift 코드로 되어있으며 Swift Package Manager를 통해서 배포된다.
-- Objective-C의 경우 기존 APNs 클라이언트 구현을 그대로 따라해도 되지만 Feedback 기능 등의 구현을 직접 해야한다.
+  - 8.7.0 ~ 8.15.0 확인 완료.
+- 아래 형태로 배포된다.
+  - **Swift**: Swift Package Manager를 통해서 배포
+  - **Objective-C**: Static library 형태로 배포
 
 ## 라이브러리 설정 및 구현 가이드
 
@@ -10,24 +12,39 @@
 
 - Firebase 프로젝트 생성 및 앱 번들 ID 등록.
 - ioTreePush 서버 설정.
+- Objective-C의 경우 라이브러리 파일을 받아서 프로젝트 하위 폴더 적당한 위치에 압축 해제.
 
 ### 2. 앱 프로젝트 설정
 
-- 프로젝트 설정의 Swift Packages 탭에 IoTreePushIos 모듈을 등록한다. (아래 그림 참조)
-  ![IoTreePushIos 패키지 등록](images/1pPerj0PU8V4.png)
-  - Location URL은 추후 변경될 수 있으며 등록시 id/password 입력을 요구하면 담당자에게 문의.
 - Target > Signing & Capabilities에서 "Push Notifications"를 등록해준다. (아래 그림 참조)
   ![스크린샷 capabilities.png](images/1Xt3Nc0zNLOv.png)
 
+  - Swift
+
+    - 프로젝트 설정의 Swift Packages 탭에 IoTreePushIos 패키지를 등록한다. (아래 그림 참조)
+      ![IoTreePushIos 패키지 등록](images/1pPerj0PU8V4.png)
+    - Location URL은 추후 변경될 수 있으며 등록시 id/password 입력을 요구하면 담당자에게 문의.
+
+  - Objective-C
+
+    - 프로젝트 Targets의 Build Settings 화면에서 Search Paths를 설정해 줘야 한다.
+      아래 그림과 같이 앱의 Build Settings > Search Paths를 찾아서 압축 해제한 라이브러리 폴더(lib, include)의 경로를 설정한다.
+      ![Search Paths](images/Objcsearchpath.png)
+    - 마지막으로 아래 그림과 같이 Target > General 탭에서 Library 등록 섹션을 찾아 libIoTreePushIosObjc.a 라이브러리를 등록한다.
+      ![Push Lib Register](images/ObjcAppLibSetting.png)
+
 ### 3. AppDelegate 작성
 
+- 소스 코드 작성 절차는 Swift와 Objective-C가 거의 동일하므로 Swift 기준으로 설명하고 Objective-C는 샘플코드를 참조하도록 한다.
 - AppDelegate를 구현한 소스 코드에 IoTreePushIos를 import한다.
-- AppDelegate에서 구현하는 메소드는 아래 2가지 이다.
+- AppDelegate에서 구현하는 메소드는 아래 2가지 이다. 아래 2개 외에 샘플코드에 보이는 2개 메소드는 `IoTreePushDelegate` 프로토콜의 구현이며 나중에 설명하도록 한다.
+
   - `application:didFinishLaunchingWithOptions:`
   - `application:didRegisterForRemoteNotificationsWithDeviceToken:`
+
 - `application:didFinishLaunchingWithOptions:` 메소드에 ioTreePush 초기화 코드를 작성한다.
 
-  - 필요한 경우 Topic을 subscribe하는 코드를 넣는다.
+  - 토픽을 사용하는 경우 Topic을 subscribe하는 코드를 넣는다.
   - 토큰을 등록하는 코드는 로그인 이후에 실행되어야 하는 경우가 많으므로 앱 시나리오에 따라 다른 곳에서 수행되기도 한다.
 
 - `application:didRegisterForRemoteNotificationsWithDeviceToken:` 메소드는 아래 예시와 같이 IoTreePush.mapToken() 메소드만 호출해주면 된다.
@@ -53,7 +70,7 @@
               feedbackBaseUrl: "https://nas.iotree.co.kr:8092" // 관리자 문의, Optional
           )
 
-          // 토픽 수신
+          // 토픽을 사용하는 경우 토픽 수신
           IoTreePush.subscribeTopic("__everyone__") { error in
               if let error = error as NSError? {
                   print("Topic subscription failed. \(error.localizedDescription)")
@@ -96,7 +113,7 @@
   - Objective-C
 
   ```objectivec
-  #import "IoTreePush.h" // 라이브러리 경로에 맞게 import
+  #import <IoTreePush.h> // 적당한 위치에 import
 
   ...
 
@@ -160,7 +177,24 @@
 - `onMessage(willPresent:withId:)` : 앱이 Foreground 상태에 있을 때 메시지가 수신되면 호출된다. 참고로 이 메소드는 Notification이 뜨기 직전에 호출되는 것이며 사용자가 Notification을 클릭하면 아래 메소드가 다시 호출된다.
 - `onMessage(didReceive:withId:)` : 앱이 Background 상태에 있을 때 메시지가 수신되면 화면 상단에 Notification이 뜨고 사용자가 표시된 Notification을 클릭하면 앱이 실행되면서 그 때 이 메소드가 호출된다.
 
-### 5. 이미지가 포함된 메시지 수신을 위한 Extension 추가. (**Optional**)
+### 5. 수신 알림 처리를 위한 메소드 호출 (**Optional**)
+
+앱이 포그라운드 상태에서 푸시를 수신한 경우 그 메시지는 수신상태로 서버에 알림이 가지만 백그라운드 상태에서 받은 푸시 메시지는 앱 사용자가 푸시 메시지를 클릭하지 않으면 수신으로 인식되지 않는다. 이런 현상을 방지하기 위해서 앱이 Active 상태로 전환되면 항상 아래 메소드를 호출해줘야 한다.
+
+- iOS 버전에 따라서 DidBecomeActive 이벤트를 처리하는 방식이 다르므로 버전/환경에 맞게 적절한 곳에서 아래 메소드를 호출한다.
+- 앱의 수신 알림 처리 시나리오가 적용되지 않는 경우 처리할 필요없다.
+
+```swift
+    // iOS 버전에 따라 SceneDelegate 또는 AppDelegate의 DidBecomeActive 메소드에서 호출해준다.
+    IoTreePush.handleDeliveredNotifications()
+```
+
+```objectivec
+    // iOS 버전에 따라 SceneDelegate 또는 AppDelegate의 DidBecomeActive 메소드에서 호출해준다.
+    [IoTreePush handleDeliveredNotifications];
+```
+
+### 6. 이미지가 포함된 메시지 수신을 위한 Extension 추가. (**Optional**)
 
 iOS의 APN은 기본적으로 지원하지 않는다. 이미지를 지원하기 위해서는 Notification Service Extension을 프로젝트에 추가하고 약간의 코드를 넣어주어야 한다.
 
@@ -178,12 +212,15 @@ iOS의 APN은 기본적으로 지원하지 않는다. 이미지를 지원하기 
 
 ![Notification Service Extension Default Code](images/41h4n33Z2wgO.png)
 
-- 새로 추가된 Notification Service Extension는 다른 Target이기 때문에 IoTreePushIos 모듈을 여기도 등록 해줘야 한다. 아래 그림과 같이 Target의 Frameworks and Libraries 항목에 IoTreePushIos 모듈을 등록한다.
+- 새로 추가된 Notification Service Extension는 다른 Target이기 때문에 IoTreePushIos 모듈을 여기도 등록 해줘야 한다.
 
-![IoTreePushIos 패키지 등록](images/1Rl6R91na2su.png)
+  - Swift의 경우 아래 그림과 같이 Target의 Frameworks and Libraries 항목에 IoTreePushIos 모듈을 등록한다.
+    ![IoTreePushIos 패키지 등록](images/1Rl6R91na2su.png)
+  - Objective-C의 경우 아래 그림과 같이 Target의 Frameworks and Libraries 항목에 Firebase 패키지의 FirebaseMessaging 모듈과 libIoTreePushIosObjc.a 파일을 등록해준다. Firebase 패키지는 이미 추가되어 있으므로 FirebaseMessaging 모듈과 libIoTreePushIosOjbc.a 를 찾아서 등록만 해주면 된다.
+    ![IoTreePushIos 패키지 등록](images/ObjcSvcExSetting.png)
 
 - 여기서 새로 등록한 Target의 Deployment Info 설정도 App의 설정과 같은 설정(iOS 버전 등)으로 맞춰주어야 한다.
-- 이제 소스를 열어서 IoTreePushIos 모듈을 임포트해주고 첫 번째 메소드의 코드를 아래와 같이 바꿔준다. if문만 아래 코드의 if문으로 교체하면 된다. (생성된 소스 코드는 NotificationService.swift 하나 뿐이다.)
+- 이제 소스를 열어서 IoTreePushIos 모듈을 임포트해주고 첫 번째 메소드의 코드를 아래와 같이 바꿔준다. (샘플 코드 참조)
 
   - Swift
 
@@ -220,7 +257,7 @@ iOS의 APN은 기본적으로 지원하지 않는다. 이미지를 지원하기 
   }
   ```
 
-### 6. 토큰 등록을 위한 Push 서버 접속 설정 (**Optional**)
+### 7. 토큰 등록을 위한 Push 서버 접속 설정 (**Optional**)
 
 3번 초기화 과정에서 `IoTreePush.initialize()` 메소드를 호출할 때 feedbackBaseUrl로 Push 서버의 주소를 설정한다. 여기서 설정한 주소가 HTTPS라면 서버는 공인 인증서로 설정이 되어야 한다. 만약 Self-signed 인증서를 사용했다면 iOS는 기본적으로 접속을 허용하지 않는다.
 
@@ -253,8 +290,9 @@ iOS의 APN은 기본적으로 지원하지 않는다. 이미지를 지원하기 
 
 ### 공통 사항
 
-- 아래 목록 중에서 몇몇 API들은 callback 파라메터들 갖는다. 이 callback 파라메터들은 모두 비동기 작업이 완료 되면 호출되는 함수들이다.
+- 아래 목록 중에서 몇몇 API들은 callback 파라미터를 갖는다. 이 callback 파라미터들은 모두 비동기 작업이 완료 되면 호출되는 함수들이다.
 - callback 함수들은 Error? 타입의 파라메터를 갖는데 이 값으로 실패 여부를 알 수 있다. 즉, error 파라메터가 nil인 경우에만 성공한 것으로 판단하고 그렇지 않은 경우 실패한 것으로 간주한다.
+- Swift와 Objective-C는 모두 동일한 기능의 API가 제공되므로 여기서는 Swift 를 기준으로 설명한다.
 
 ### SDK 초기화
 
