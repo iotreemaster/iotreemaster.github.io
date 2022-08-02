@@ -4,7 +4,7 @@
 
 SDK 사용을 위해서 다음 순서대로 구현을 진행한다.
 
-1. 프로젝트 생성 후 위의 **라이브러리 설정**을 수행.
+1. 프로젝트 생성 후 아래의 **라이브러리 설정**을 수행.
 2. **알림 기본 옵션 설정** 수행. (Optional)
    - AndroidManifest.xml 파일에서 설정.
    - 또는 코드로 설정 가능.
@@ -65,10 +65,10 @@ SDK 사용을 위해서 다음 순서대로 구현을 진행한다.
    }
    ```
 
-   - 자세한 사항은 https://firebase.google.com/docs/cloud-messaging/android/client?hl=ko 참고!
+   - 자세한 사항은 <https://firebase.google.com/docs/cloud-messaging/android/client?hl=ko> 참고!
 
 4. aar 파일을 다운로드 한다.
-   - https://github.com/iotreemaster/iotreemaster.github.io/raw/main/iotreePush.aar
+   - <https://github.com/iotreemaster/iotreemaster.github.io/raw/main/iotreePush.aar>
 5. app/libs에 다운로드한 aar 파일을 저장하고 build.gradle(app)에 라이브러리를 추가해준다.
 
    ```
@@ -89,13 +89,14 @@ SDK 사용을 위해서 다음 순서대로 구현을 진행한다.
 ### SDK 초기화
 
 - 푸시 알림을 받기 위해서 가장 먼저 필수적으로 해야하는 과정으로 push SDK를 초기화한다.
-- IoTreePush.initialize()를 호출하여 초기화하고 context와 appKey를 매개변수로 넘겨준다.
+- IoTreePush.initialize()를 호출하여 초기화하고 context, appKey, feedbackBaseUrl을 매개변수로 넘겨준다.
 
   - context: Android Context.
-  - appKey: ioTree Push 서버에서 발급하는 고유한 키 값(String).
+  - appKey: ioTree Push 서버에서 발급하는 고유한 키 값(String). 서버 담당자에게 문의.
+  - feedbackBaseUrl: 서버 url. 서버 담당자에게 문의
 
   ```java
-  IoTreePush.initialize(context, appKey);
+  IoTreePush.initialize(context, appKey, feedbackBaseUrl);
   ```
 
 ### 토큰 발급
@@ -105,14 +106,17 @@ SDK 사용을 위해서 다음 순서대로 구현을 진행한다.
 
   - context: Android Context.
   - userId: 서비스에 따른 사용자 식별자 값. (서비스 구현에 따라 어떤 값이든 될 수 있다. 예를 들어 서비스 Login ID 같은 값을 사용할 수 있다.)
-  - callback: 완료 시 호출되는 callback 객체.
+  - groups
+    - 사용자가 속한 그룹
+    - 없으면 null, 속한 그룹의 알림을 받기 위해서는 Set으로 그룹 값을 넘겨줘야한다. ex) Android, Ios, sales 등
+  - callback: 완료 시 호출되는 callback 객체(발급된 토큰을 확인할 수 있다.)
 
   ```java
   interface RegisterTokenCallback {
       void onRegister(IoTreePushResult result, String token);
   }
 
-  IoTreePush.registerToken(context, userId, new RegisterTokenCallback() {
+  IoTreePush.registerToken(context, userId, groups, new RegisterTokenCallback() {
       @Override
       public void onRegister(IoTreePushResult result, String token) {
           if (!result.isSuccess()) {
@@ -151,7 +155,7 @@ SDK 사용을 위해서 다음 순서대로 구현을 진행한다.
 - 원하는 토픽을 선택하여 구독 요청을 한다. 토픽으로 전송된 모든 메시지를 수신할 수 있다.
 
   - topic: 토픽
-  - callback:완료 시 호출되는 callback 객체.
+  - callback: 완료 시 호출되는 callback 객체.
 
   ```java
   interface SubscribeTopicCallback {
@@ -194,6 +198,7 @@ SDK 사용을 위해서 다음 순서대로 구현을 진행한다.
 
 - 앱이 백그라운드 상태에서 수신된 알림(Notification) 클릭 시 지정된 launcher activity가 실행되는데 이 activity의 onCreate()에서 호출해준다.
 - '수신확인' 처리를 하지 않는다면 호출하지 않아도 되지만 무조건 호출해도 무방하기 때문에 가능하면 호출해주도록 한다.
+
   ```java
   IoTreePush.handleNotification(this);
   ```
