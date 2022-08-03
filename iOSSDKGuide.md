@@ -113,6 +113,15 @@
   - Objective-C
 
   ```objectivec
+  // AppDelegate.h
+
+  @interface AppDelegate : UIResponder <UIApplicationDelegate, IoTreePushDelegate>
+  ...
+  @end
+  ```
+
+  ```objectivec
+  // AppDelegate.h
   #import <IoTreePush.h> // 적당한 위치에 import
 
   ...
