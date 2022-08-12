@@ -7,7 +7,7 @@ SDK 사용을 위해서 다음 순서대로 구현을 진행한다.
 1. 프로젝트 생성 후 아래의 **라이브러리 설정**을 수행.
 2. **알림 기본 옵션 설정** 수행. (Optional)
    - AndroidManifest.xml 파일에서 설정.
-   - 또는 코드로 설정 가능.
+   - ~~또는 코드로 설정 가능.~~
 3. **SDK 초기화**를 수행.
 4. **토큰 발급**을 수행.
 5. **토픽 구독**을 수행. (Optional)
@@ -65,10 +65,10 @@ SDK 사용을 위해서 다음 순서대로 구현을 진행한다.
    }
    ```
 
-   - 자세한 사항은 <https://firebase.google.com/docs/cloud-messaging/android/client?hl=ko> 참고!
+   - 자세한 사항은 https://firebase.google.com/docs/cloud-messaging/android/client?hl=ko 참고!
 
 4. aar 파일을 다운로드 한다.
-   - <https://github.com/iotreemaster/iotreemaster.github.io/raw/main/iotreePush.aar>
+   - https://github.com/iotreemaster/iotreemaster.github.io/raw/main/iotreePush.aar
 5. app/libs에 다운로드한 aar 파일을 저장하고 build.gradle(app)에 라이브러리를 추가해준다.
 
    ```
@@ -92,8 +92,8 @@ SDK 사용을 위해서 다음 순서대로 구현을 진행한다.
 - IoTreePush.initialize()를 호출하여 초기화하고 context, appKey, feedbackBaseUrl을 매개변수로 넘겨준다.
 
   - context: Android Context.
-  - appKey: ioTree Push 서버에서 발급하는 고유한 키 값(String). 서버 담당자에게 문의.
-  - feedbackBaseUrl: 서버 url. 서버 담당자에게 문의
+  - appKey: ioTree Push 서버에서 발급하는 고유한 키 값(String).
+  - feedbackBaseUrl: 서버 url.
 
   ```java
   IoTreePush.initialize(context, appKey, feedbackBaseUrl);
@@ -198,7 +198,6 @@ SDK 사용을 위해서 다음 순서대로 구현을 진행한다.
 
 - 앱이 백그라운드 상태에서 수신된 알림(Notification) 클릭 시 지정된 launcher activity가 실행되는데 이 activity의 onCreate()에서 호출해준다.
 - '수신확인' 처리를 하지 않는다면 호출하지 않아도 되지만 무조건 호출해도 무방하기 때문에 가능하면 호출해주도록 한다.
-
   ```java
   IoTreePush.handleNotification(this);
   ```
@@ -347,3 +346,19 @@ SDK 사용을 위해서 다음 순서대로 구현을 진행한다.
       </intent-filter>
   </receiver>
   ```
+
+### Custom Data(사용자 데이터) 사용법
+
+- 콘솔에서 메세지를 보낼 때, title, body 등 정해진 필드 이외에 custom data를 담아서 보낼 수 있다.
+- custom data는 (key : value) 형식으로 알림 클릭 시 intent에 데이터를 담아서 보낸다.
+- 알림 클릭 시 이동할 activity에서 아래와 같이 custom data를 꺼내서 사용할 수 있다.
+
+```java
+Intent intent = getIntent();
+Bundle bundle = intent.getExtras();
+
+if (bundle != null) {
+    // 지정된 키가 있다면 바로 bundle에서 꺼내서 사용한다.
+    String customData = bundle.getString("customData");
+}
+```
