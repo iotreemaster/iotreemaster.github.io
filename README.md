@@ -177,7 +177,7 @@ SDK 사용을 위해서 다음 순서대로 구현을 진행한다.
 - 지정된 토픽 구독을 해제한다. 토픽 구독을 해제하면 토픽으로 메세지를 발송해도 수신이 되지 않는다.
 
   - topic: 토픽
-  - callback:완료 시 호출되는 callback 객체.
+  - callback: 완료 시 호출되는 callback 객체.
 
   ```java
   interface UnsubscribeTopicCallback {
@@ -207,17 +207,28 @@ SDK 사용을 위해서 다음 순서대로 구현을 진행한다.
 - Notification과 NotificationChannel에 대한 기본 옵션을 설정한다.
 - 필수는 아니며 설정하지 않으면 기본 설정이 사용된다. 부분적으로 필요한 옵션만 설정 가능하다.
 - 기본으로 제공하는 NotificationChannel의 이름과 설명을 설정한다.
-- Notification의 아이콘, 색상, 알림음을 설정한다.
-- 알림음의 경우, res/raw에 저장된 로컬 리소스만 사용가능 하다.
-- 기본적으로 앱이 포그라운드 상태이면 Notification을 띄우지 않지만 SDK로 하여금 Notification을 띄우도록 설정하려면 enableForeground(true)로 설정한다. (default: false)
-  - enable_foreground가 false인 경우 custom receiver를 구현하지 않았다면 앱에서는 메시지가 수신된 걸 알 수 없으므로 enable_foreground를 false로 설정한다면 custom receiver 구현을 권장한다.
+
+- Notification의 아이콘, 색상, 알림음, 포그라운드 알림 여부를 설정한다.
+- 기본 값(기기나 버전의 시스템에 따라 기본 값이 다를 수 있다.)
+    - 아이콘 : 앱 아이콘(Androidmanifest의 application 태그에 설정된 icon)
+
+    - 색상 : 시스템에 설정된 색상
+
+    - 알림음 : 시스템 기본 알림 소리
+
+    - 포그라운드 알림 : false
+
+- 알림음의 경우, res/raw에 저장된 로컬 리소스만 사용가능 하고 value는 파일의 이름으로 설정한다
+- 기본적으로 앱이 포그라운드 상태이면 Notification을 띄우지 않지만 SDK로 하여금 Notification을 띄우도록 설정하려면 enableForeground(true)로 설정한다.
+  - enable_foreground가 false인 경우 custom receiver를 구현하지 않았다면 앱에서는 메시지가 수신된 걸 알 수 없으므로 enable_foreground를 false로 
+  설정한다면 custom receiver 구현을 권장한다.
 - Androidmanifest.xml 파일에서 설정한다. (Runtime에 설정할 수 없다.)
 - ~~Runtime에 코드로 설정하거나 AndroidManifest.xml 파일에 메타 데이터로 정의할 수 있다. 만약 둘 다 설정된 경우 코드로 설정된 값이 우선 적용된다.~~
 
   ```xml
-  <meta-data android:name="kr.co.iotree.push.notification.default_notification_icon"
+  <meta-data android:name="com.google.firebase.messaging.default_notification_icon"
               android:resource="@drawable/default_notification_icon" />
-  <meta-data android:name="kr.co.iotree.push.notification.default_notification_color"
+  <meta-data android:name="com.google.firebase.messaging.default_notification_color"
               android:resource="@color/default_notification_color" />
   <meta-data android:name="kr.co.iotree.push.notification.default_notification_sound"
               android:value="noti" />
