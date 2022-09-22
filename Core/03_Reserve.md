@@ -32,7 +32,7 @@ app-key: 608efc0f8f9e8aa11caed834203d7e03bba2456824405310bf876ae8268375cc
     "target":{
         "userIds":["yjmoon"],
         "topic":null,
-        "group":null
+        "groups":null
     },
     "message":{
         "title":"제목입니다.",

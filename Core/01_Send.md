@@ -23,7 +23,7 @@ app-key: 608efc0f8f9e8aa11caed834203d7e03bba2456824405310bf876ae8268375cc
     "target":{
         "userIds":["yjmoon"],
         "topic":null,
-        "group":null
+        "groups":null
     },
     "message":{
         "title":"제목입니다.",
@@ -51,7 +51,7 @@ app-key: 608efc0f8f9e8aa11caed834203d7e03bba2456824405310bf876ae8268375cc
     - 예: ["yjmoon", "sampleid"]
   - `topic`: 푸시를 수신할 topic을 지정한다. topic은 하나만 지정할 수 있다.
     - 예: "everyone"
-  - `group`: 푸시를 수신할 group을 지정한다. 여러 그룹을 동시에 지정할 수 있다.
+  - `groups`: 푸시를 수신할 group을 지정한다. 여러 그룹을 동시에 지정할 수 있다.
     - topic과 비숫한 기능이지만 topic과 달리 각 그룹원들에게 각각 발송하여 발송 이력이 기록된다.
     - 참고로 지정된 그룹 중에 2개 이상 포함된 사용자가 있더라도 메시지는 하나만 받게된다.
     - 예: ["AndroidGroup", "iOSGroup"]
